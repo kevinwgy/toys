@@ -1,0 +1,17 @@
+Computation started at:
+  2019-09-25.18:40:44
+Using Code Revision:
+  4+ | c64568b34605+
+
+Inputs
+  Xmin                = 0
+  Xmax                = 1
+  NumberOfNodes(N)    = 401
+  SourceIntensity(I0) = 10
+  Alpha0              = 1
+  Interval1_Xmin      = 0.25
+  Interval1_Xmax      = 0.5
+  Interval1_alpha     = 4
+  Interval2_Xmin      = 0.5
+  Interval2_Xmax      = 0.75
+  Interval2_alpha     = 0.25

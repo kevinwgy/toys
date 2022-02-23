@@ -274,10 +274,10 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
   }
 
   //Stop reading.
-  cout << "Number of 3D elements: " << volumeCounter << " (in " << volumeTopo.size() << " physical groups).\n";
+  cout << "Number of 3D elements: " << volumeCounter << " (in " << volumeTopo.size() << " physical volumes).\n";
   if(volumeTopo.size()>1) {
     for(auto it = volumeTopo.begin(); it != volumeTopo.end(); it++) {
-      cout << "- Group " << it->first << ": ";
+      cout << "- Physical volume " << it->first << ": ";
       vector<int>& elems(it->second);
       sort(elems.begin(), elems.end());
       for(int i=0; i<elems.size(); i++) {

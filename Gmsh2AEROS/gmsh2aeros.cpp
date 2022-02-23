@@ -69,6 +69,7 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
   // Read Entities
   int nPoints, nCurves, nSurfaces, nVolumes;
   multimap<int,int> entity2surface; //this is a multimap because one entity can belong to multiple surfaces
+  multimap<int,int> entity2volume; //this is a multimap because one entity can belong to multiple volumes
   map<int,ofstream*> surfaceTopo;
   map<int,int> surfaceTopoCounter;
   getline(input,text);
@@ -101,8 +102,20 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
     getline(input,text);
   }
 
-  for(int i=0; i<nVolumes; i++)
+  // now, read volume entities
+  map<int, vector<int> > volumeTopo; //stores the ids of elements in each (physical) volume group
+  for(int i=0; i<nVolumes; i++) {
+    input >> id >> x0 >> x1 >> y0 >> y1 >> z0 >> z1 >> nPhyTag;
+    if(nPhyTag > 1)
+      cout <<"Note: Detected multiple (" << nPhyTag << ") physical tags for volume entity " << id << ".\n";
+    for(int j=0; j<nPhyTag; j++) {
+      input >> phyTag;
+      entity2volume.insert(pair<int,int>(id, phyTag));
+      if(volumeTopo.find(phyTag) == volumeTopo.end())
+        volumeTopo[phyTag] = {};
+    }
     getline(input,text); 
+  }
 
   getline(input,text);
   if(text.compare("$EndEntities")) {
@@ -195,7 +208,7 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
       int nNodesInElem = elemType[currentElemType].first; //actually not used
       int aerosElemTag = elemType[currentElemType].second;
       if(entity2surface.find(entityTag) == entity2surface.end()) {
-        cerr << "ERROR: Found elements that do not belong to a physical surface or volume (entityTag = " << entityTag << "). Aborting.\n";
+        cerr << "ERROR: Found elements that do not belong to a physical surface (entityTag = " << entityTag << "). Aborting.\n";
         exit(-1);
       }
       auto ret = entity2surface.equal_range(entityTag);
@@ -224,6 +237,15 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
         cerr << "ERROR: Unknown/unsupported element type " << currentElemType << ". Aborting.\n";
         exit(-1); 
       }
+      if(entity2volume.find(entityTag) == entity2volume.end()) {
+        cerr << "ERROR: Found elements that do not belong to a physical volume (entityTag = " << entityTag << "). Aborting.\n";
+        exit(-1);
+      }
+      auto ret = entity2volume.equal_range(entityTag);
+      for(auto it=ret.first; it!=ret.second; it++) {
+        int phyTag = it->second;
+        volumeTopo[phyTag].reserve(volumeTopo[phyTag].size() + nElemsInBlock);
+      }
       for (int i=0; i<nElemsInBlock; i++) {
         input >> id0; /*not used*/
         getline(input,text);
@@ -233,6 +255,11 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
         while(is>>thisnode)
           output << "  " << std::setw(12) << indexmap[thisnode-1];
         output << "\n";
+
+        for(auto it=ret.first; it!=ret.second; it++) {
+          phyTag = it->second;
+          volumeTopo[phyTag].push_back(volumeCounter);
+        }
       }
     } else {
       cerr << "ERROR: Found EntityDim = " << entityDim << ". Currently the postprocessor only supports several types of 2D & 3D elements. Aborting\n";
@@ -247,8 +274,22 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
   }
 
   //Stop reading.
-  
-  cout << "Number of 3D elements: " << volumeCounter << ".\n";
+  cout << "Number of 3D elements: " << volumeCounter << " (in " << volumeTopo.size() << " physical groups).\n";
+  if(volumeTopo.size()>1) {
+    for(auto it = volumeTopo.begin(); it != volumeTopo.end(); it++) {
+      cout << "- Group " << it->first << ": ";
+      vector<int>& elems(it->second);
+      sort(elems.begin(), elems.end());
+      for(int i=0; i<elems.size(); i++) {
+        if(i==0 || elems[i-1] != elems[i]-1)
+          cout << "[" << elems[i] << ", ";
+        if(i==elems.size()-1 || elems[i+1] != elems[i]+1)
+          cout << elems[i] << "]    ";
+      }
+      cout << endl;
+    }
+  }
+
   for(auto it = surfaceTopoCounter.begin(); it != surfaceTopoCounter.end(); it++) {
     cout << "Number of 2D elements in SURFACETOPO " << it->first << ": " << it->second << endl;
     output << "*" << endl;

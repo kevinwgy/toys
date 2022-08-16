@@ -15,7 +15,10 @@ int main(int argc,char **argv)
 
   PetscInitialize(&argc,&argv,NULL,NULL);
 
-  int nVar = GetNumberOfVariables();
+
+  ProblemData data; /* problem-specific data */
+  SetProblemData(data);
+  int nVar = GetNumberOfVariables(data);
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Create nonlinear solver context
@@ -37,7 +40,7 @@ int main(int argc,char **argv)
 
   // Set function evaluation routine and vector. (and check for errors)
   // r = Fun(x)
-  ierr = SNESSetFunction(snes,r,Fun,NULL);  CHKERRQ(ierr);
+  ierr = SNESSetFunction(snes,r,Fun,&data);  CHKERRQ(ierr);
 
   // Set Jacobian matrix data structure and Jacobian evaluation routine (and check for error)
   ierr = SNESSetJacobian(snes,J,J,SNESComputeJacobianDefault,NULL);  CHKERRQ(ierr);
@@ -53,8 +56,24 @@ int main(int argc,char **argv)
   SNESGetKSP(snes,&ksp);
   KSPGetPC(ksp,&pc);
   PCSetType(pc,PCNONE);
-  ierr = KSPSetTolerances(ksp,1.e-4,PETSC_DEFAULT,PETSC_DEFAULT,20);CHKERRQ(ierr);
+  ierr = KSPSetTolerances(ksp,1.e-6,PETSC_DEFAULT,PETSC_DEFAULT,50);CHKERRQ(ierr);
 
+  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     Evaluate initial guess; then solve nonlinear system
+   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+  SetInitialGuess(x, data);
+
+  // evaluation function using initial guess
+  
+  Vec tmp;
+  VecDuplicate(x,&tmp);
+  Fun(snes, x, tmp, &data);
+  VecView(tmp,PETSC_VIEWER_STDOUT_WORLD);
+  double mynorm(-1);
+  VecNorm(tmp, NORM_2, &mynorm);
+  fprintf(stderr,"Norm of f(x0) = %e.\n", mynorm);
+
+  // Set options
   /*
      Set SNES/KSP/KSP/PC runtime options, e.g.,
          -snes_view -snes_monitor -ksp_type <ksp> -pc_type <pc>
@@ -64,10 +83,6 @@ int main(int argc,char **argv)
   */
   ierr = SNESSetFromOptions(snes);CHKERRQ(ierr);
 
-  /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-     Evaluate initial guess; then solve nonlinear system
-   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-  SetInitialGuess(x);
 
   // ----------------------
   //  SOLVE
@@ -76,12 +91,19 @@ int main(int argc,char **argv)
   ierr = SNESSolve(snes,NULL,x);CHKERRQ(ierr);
   cout << "- Done!" << endl << endl;
 
-
+/*
+  cout << "Solution..." << endl;
   Vec f;
   VecView(x,PETSC_VIEWER_STDOUT_WORLD);
-  SNESGetFunction(snes,&f,0,0);
-  VecView(r,PETSC_VIEWER_STDOUT_WORLD);
-
+//  SNESGetFunction(snes,&f,0,0);
+//  VecView(r,PETSC_VIEWER_STDOUT_WORLD);
+*/
+  cout << "F(X)..." << endl;
+  Fun(snes, x, tmp, &data);
+ // VecView(tmp,PETSC_VIEWER_STDOUT_WORLD);
+  VecNorm(tmp, NORM_2, &mynorm);
+  fprintf(stderr,"Norm of f(x) = %e.\n", mynorm);
+   
 
   // print to file
   const double *xx;

@@ -1,0 +1,1 @@
+./solve -snes_view -snes_monitor -snes_type ngmres -snes_atol 1e-4 -snes_fd_color

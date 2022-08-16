@@ -3,6 +3,7 @@
 #include<string>
 #include<list>
 #include<iomanip> //setw
+#include<vector>
 #include"Vector3D.h"
 using namespace std;
 
@@ -66,9 +67,18 @@ int main(int argc, char* argv[])
 
   output << "Elements Surface using SurfaceNodes" << endl;
   counter = 0;
-  for(auto it = elems.begin(); it != elems.end(); it++)
+  vector<Vec3D> nodes_v(nodes.begin(), nodes.end());
+  for(auto it = elems.begin(); it != elems.end(); it++) {
+    //check if area is non-zero
+    n1 = (*it)[0]; n2 = (*it)[1]; n3 = (*it)[2];
+    Vec3D cr = (nodes_v[n2] - nodes_v[n1])^(nodes_v[n3] - nodes_v[n1]);
+    if(cr.norm() < 1e-8) {
+      cerr << "*** Detected a degenerate triangle --- dropped from the list." << endl;
+      continue;
+    }
     output << std::setw(12) << ++ counter << "    4" << std::setw(12) << (*it)[0]+1 
            << std::setw(12) << (*it)[1]+1 << std::setw(12) << (*it)[2]+1 << "\n";
+  }
 
   input.close();
   output.close();

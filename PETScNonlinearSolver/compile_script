@@ -1,0 +1,1 @@
+g++ nonlinear_solver.cpp -O3 -lpetsc -o solve

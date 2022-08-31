@@ -1,0 +1,1 @@
+g++ optimizer.cpp -O3 -lpetsc -o solve

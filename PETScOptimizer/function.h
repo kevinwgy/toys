@@ -357,7 +357,8 @@ PetscErrorCode Fun(Tao tao, Vec X, Vec F, void *ctx)
     if(keynes[k] == 0)
       f[D+k - i0] = x[D+k] - x[2*D+k]/(A[k]*init_lambda[k]);
     else
-      f[D+k - i0] = x[D+k] - (1 + freq_re[k]*(x[k]-1));
+      //f[D+k - i0] = x[D+k] - (1 + freq_re[k]*(x[k]-1));
+      f[D+k - i0] = x[D+k] - exp(freq_re[k]*log(x[k]));
   }
 
   // p(334) = 1
@@ -404,7 +405,7 @@ PetscErrorCode Jacobian(Tao tao, Vec X, Mat J, Mat Jpre, void *ctx)
   const double *f0, *f1;
 
   double *x = data->xglob;
-  double dx = 1.0e-6;
+  double dx = 1.0e-5;
 
   int i0, imax, my_size;
   VecGetOwnershipRange(X, &i0, &imax);

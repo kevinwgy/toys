@@ -46,6 +46,17 @@ int main(int argc,char **argv)
   SetInitialGuess(x, data);
   SetSolutionBounds(xl, xu, data);
 
+  Fun(tao, x, r, (void*)&data);
+  VecView(r, PETSC_VIEWER_STDOUT_WORLD); 
+  double rnorm;
+  VecNorm(r, NORM_2, &rnorm);
+  if(!mpi_rank)
+    cout << "- Initial guess: 2-Norm of residual is: " << rnorm << endl;
+  VecNorm(r, NORM_INFINITY, &rnorm);
+  if(!mpi_rank)
+    cout << "- Initial guess: inf-Norm of residual is: " << rnorm << endl;
+
+
 
   // Set up solver
   TaoSetType(tao, TAOBRGN);
@@ -77,6 +88,16 @@ int main(int argc,char **argv)
   VecView(x,viewer);
   PetscViewerPopFormat(viewer);
   PetscViewerDestroy(&viewer);
+
+
+  Fun(tao, x, r, (void*)&data);
+  VecView(r, PETSC_VIEWER_STDOUT_WORLD); 
+  VecNorm(r, NORM_2, &rnorm);
+  if(!mpi_rank)
+    cout << "- 2-Norm of residual is: " << rnorm << endl;
+  VecNorm(r, NORM_INFINITY, &rnorm);
+  if(!mpi_rank)
+    cout << "- inf-Norm of residual is: " << rnorm << endl;
 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Free work space.  All PETSc objects should be destroyed when they

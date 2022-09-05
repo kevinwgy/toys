@@ -1,0 +1,1 @@
+mpirun -n $1 ./solve -tao_view -tao_monitor -tao_type brgn -tao_gatol 1e-8 -tao_gttol 1e-8 -tao_grtol 1e-8 2>&1 | tee log.out

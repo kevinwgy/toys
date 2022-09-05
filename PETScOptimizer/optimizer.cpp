@@ -12,11 +12,16 @@ int main(int argc,char **argv)
 
   PetscInitialize(&argc,&argv,NULL,NULL);
 
+  int mpi_rank, mpi_size;
+  MPI_Comm_rank(PETSC_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(PETSC_COMM_WORLD, &mpi_size);
+
   ProblemData data; /* problem-specific data */
   SetProblemData(data);
   int nVar = GetNumberOfVariables(data);
 
-  fprintf(stderr,"nVar = %d.\n", nVar);
+  if(!mpi_rank)
+    fprintf(stderr,"nVar = %d.\n", nVar);
 
   TaoCreate(PETSC_COMM_WORLD,&tao);
 
@@ -38,9 +43,11 @@ int main(int argc,char **argv)
   MatSetFromOptions(J);
   MatSetUp(J);
 
-  fprintf(stderr,"2 nVar = %d.\n", nVar);
+  if(!mpi_rank)
+    fprintf(stderr,"2 nVar = %d.\n", nVar);
   SetInitialGuess(x, data);
-  fprintf(stderr,"3 nVar = %d.\n", nVar);
+  if(!mpi_rank)
+    fprintf(stderr,"3 nVar = %d.\n", nVar);
   SetSolutionBounds(xl, xu, data);
 
 
@@ -56,28 +63,25 @@ int main(int argc,char **argv)
   // ----------------------
   //  SOLVE
   // ----------------------
-  cout << "- Solving the optimization problem." << endl;
+  if(!mpi_rank)
+    cout << "- Solving the optimization problem." << endl;
+
   TaoSolve(tao);
-  cout << "- Done!" << endl << endl;
+
+  if(!mpi_rank)
+    cout << "- Done!" << endl << endl;
 
 
   TaoGetSolutionVector(tao, &x);
 
   // print to file
-  const double *xx;
-  VecGetArrayRead(x,&xx);
-  ofstream out("solution.txt"); 
-  if(out.is_open()) {
+  PetscViewer viewer;
+  PetscViewerASCIIOpen(PETSC_COMM_WORLD, "Solution.m", &viewer);
+  PetscViewerPushFormat(viewer, PETSC_VIEWER_ASCII_MATLAB);
+  VecView(x,viewer);
+  PetscViewerPopFormat(viewer);
+  PetscViewerDestroy(&viewer);
 
-   for(int i=0; i<nVar; i++)
-     out << xx[i] << "\n"; 
-
-   out.close();
-   
-  } else
-    cout << "*** Error: Unable to write solution to file 'solution.txt'." << endl;
-  VecRestoreArrayRead(x,&xx);
- 
   /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      Free work space.  All PETSc objects should be destroyed when they
      are no longer needed.

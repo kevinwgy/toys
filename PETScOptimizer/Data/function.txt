@@ -1,0 +1,109 @@
+//-------------------------------------
+// Set initial guess
+//-------------------------------------
+extern double x;
+
+void SetInitialGuess(Vec X)
+{
+  double *x;
+  VecGetArray(X,&x);
+
+  // Set initial guess
+  x[0] = 0.0;
+  x[1] = 0.0;
+
+  VecRestoreArray(X,&x);
+}
+
+//-------------------------------------
+// Evaluation function F = Fun(X)
+//-------------------------------------
+PetscErrorCode Fun(SNES snes,Vec X,Vec F,void *dummy)
+{
+  const double *x;
+  double *f;
+  VecGetArrayRead(X,&x);
+  VecGetArray(F,&f);
+
+// index k, j, m
+// scalar: D, temp 
+// given vector Dx1: theta, A, init_p, init_lambda
+// matrix DxD: B, Omega_re, 
+// solve vector: x = [p, lambda];
+
+ //-----------------------------
+ // Compute function
+ 
+ // p(2:199, 1, 333)
+ double temp = 0.0;
+ double N = 66.0;
+ double D = 334.0;
+
+ for (int k=1; k<=D; k++) {
+   if (cobb_douglas[k]==0) { 
+     for (int j=1; j<=D; j++){
+        temp = temp + pow(B[k][j],theta[k])*Omega_re[k][j]*pow(x[j],(1-theta[k]));
+      }
+      f[k] = x[k] - 1/A[k]*pow(temp,(1/(1-theta[k])));
+      temp = 0.0;
+    }
+    else if (cobb_douglas[k]==1){
+        for (int j=1; j<=D; j++){
+        temp = temp + B[k][j]*Omega_re[k][j]*log(x[j])
+        }
+      f[k] = x[k] - exp(-log(A[k])+temp);
+      temp = 0.0;
+    }
+  }
+  
+// lambda (1-331, 334)
+for (int k=1; k<=D; k++) {
+    if (factor[k]<2) {
+        temp=0;
+        for (int j=1; j<=D; j++) {
+            if (factor[j]>0) {
+                temp = temp + x[D+j]*pow(B[j][k],theta[j])*Omega_re[j][k]*pow(x[k],(1-theta[j]))* pow(x[j],-(1-theta[j]))*pow(A[j],(theta[j]-1));        
+                }
+            }
+            f[D+k] = x[D+k] - temp;
+        }
+    }
+
+// lambda(334) = 1
+f[2*D-1] = x[2*D-1] - 1;
+
+// lambda(332)
+temp = 0;
+for (int j=1; j<=D; j++){
+    if (factor[j]==0){
+        temp=temp+ init_lambda[j]*(1-phi_htm[j])*(1-x[D+j]/x[j]/init_lambda[j]);
+    }
+}
+f[D+D-2] = temp*x[D+D];
+
+// lambda(333)
+temp=0; 
+for (int j=1; j<=D; j++){
+    if (factor[j]==0){
+        temp = temp + x[D+j];
+    }
+}
+f[D+D-1] = x[D+D-1] - (temp - x[D+D-2]);
+
+// p(200-331)
+for (int k=1; k<=D; k++){
+    if (keynes[k] == 0) {
+    f[k] = x[k] - x[D+k]/(A[k]*init_lambda[k]);
+    }
+}
+
+// p(334) = 1
+f[D] = x[D] - 1;
+
+ //----------------------------
+
+  VecRestoreArrayRead(X,&x);
+  VecRestoreArray(F,&f);
+  return 0;
+}
+                                                                               

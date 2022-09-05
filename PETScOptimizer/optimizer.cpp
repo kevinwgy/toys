@@ -1,5 +1,5 @@
 #include <petsctao.h>
-#include "function_test.h"
+#include "function.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
@@ -43,11 +43,7 @@ int main(int argc,char **argv)
   MatSetFromOptions(J);
   MatSetUp(J);
 
-  if(!mpi_rank)
-    fprintf(stderr,"2 nVar = %d.\n", nVar);
   SetInitialGuess(x, data);
-  if(!mpi_rank)
-    fprintf(stderr,"3 nVar = %d.\n", nVar);
   SetSolutionBounds(xl, xu, data);
 
 

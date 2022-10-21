@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Comm/Communicator.h
+stdio.h
+-
+mpi.h
+-
+../Utils/ResizeArray.h
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Utils/ResizeArray.h
+stdlib.h
+-
+stdio.h
+-
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Hetero/FlExchange.C
+FlExchange.h
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Hetero/FlExchange.h
+../Comm/Communicator.h
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Comm/Communicator.h
+../Math/Vector.h
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Math/Vector.h
+cmath
+-
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Hetero/FlExchange.h
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Math/Vector.h
+iostream
+-
+complex
+-
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Utils/ResizeArray.h
+

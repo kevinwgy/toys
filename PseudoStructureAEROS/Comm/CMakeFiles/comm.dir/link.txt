@@ -1,0 +1,2 @@
+/apps/easybuild/software/tinkercliffs-rome/binutils/2.32-GCCcore-8.3.0/bin/ar qc libcomm.a  CMakeFiles/comm.dir/CommunicatorCore.C.o
+/apps/easybuild/software/tinkercliffs-rome/binutils/2.32-GCCcore-8.3.0/bin/ranlib libcomm.a

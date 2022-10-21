@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Comm/Communicator.h
+stdio.h
+-
+mpi.h
+-
+../Utils/ResizeArray.h
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Utils/ResizeArray.h
+stdlib.h
+-
+stdio.h
+-
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Comm/CommunicatorCore.C
+stdlib.h
+-
+iostream
+-
+stdio.h
+-
+mpi.h
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Comm/mpi.h
+Communicator.h
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Comm/Communicator.h
+
+/home/kevinw3/tinkercliffs/toys/PseudoStructureAEROS/Utils/ResizeArray.h
+

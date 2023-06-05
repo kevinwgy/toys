@@ -148,24 +148,32 @@ int main(int argc, char* argv[])
     }
   }
 
-  // print surface components / groups
+  int nGroups = 0; //count the number of non-empty groups
   for(auto&& eg : elem_groups) {
     if(eg.second.empty())
       continue;
-    output << "Elements " << eg.first << " using SurfaceNodes\n";
-    counter = 0;
-    elems = &eg.second;
-    for(auto it = elems->begin(); it != elems->end(); it++) {
-      //check if area is non-zero
-      n1 = (*it)[0]; n2 = (*it)[1]; n3 = (*it)[2];
-      Vec3D cr = (nodes[n2-1] - nodes[n1-1])^(nodes[n3-1] - nodes[n1-1]);
-      if(cr.norm() < area_tol)
-        continue;
-      output << std::setw(12) << ++ counter << "    4" << std::setw(12) << n1
-             << std::setw(12) << n2 << std::setw(12) << n3 << "\n";
-    }
+    nGroups++;
   }
 
+  // print surface components / groups
+  if(nGroups>1) {
+    for(auto&& eg : elem_groups) {
+      if(eg.second.empty())
+        continue;
+      output << "Elements " << eg.first << " using SurfaceNodes\n";
+      counter = 0;
+      elems = &eg.second;
+      for(auto it = elems->begin(); it != elems->end(); it++) {
+        //check if area is non-zero
+        n1 = (*it)[0]; n2 = (*it)[1]; n3 = (*it)[2];
+        Vec3D cr = (nodes[n2-1] - nodes[n1-1])^(nodes[n3-1] - nodes[n1-1]);
+        if(cr.norm() < area_tol)
+          continue;
+        output << std::setw(12) << ++ counter << "    4" << std::setw(12) << n1
+               << std::setw(12) << n2 << std::setw(12) << n3 << "\n";
+      }
+    }
+  }
 
   input.close();
   output.close();

@@ -98,10 +98,8 @@ int main(int argc, char* argv[])
       for(int i=1; i<nVerts-1; i++)
         elems->push_back(Int3(ind[0], ind[i], ind[i+1]));
     }
-    else {
-      if(word=="50475/51567/202020") fprintf(stdout,"GOT YOU!!!! Line: %d\n", line_number);
+    else
       ignored_keywords.insert(word);
-    }
   }
 
 

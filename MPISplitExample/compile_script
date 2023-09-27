@@ -1,0 +1,2 @@
+g++ solver1.cpp -lpetsc -lmpi -o solver1 -O3
+g++ solver2.cpp -lmpi -o solver2 -O3

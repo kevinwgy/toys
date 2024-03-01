@@ -29,15 +29,10 @@ int main(int argc, char* argv[])
   int i1, i2, i3;
   list<Vec3D> nodes;
   list<Int3> elems;
-  int iter = 0;
  
   while(true) {
 
-    iter++;
-
     getline(input, line);
-
-//    cout << iter << "  " <<  line << endl;
 
     if(line.compare(0,8,"endsolid") == 0)
       break;

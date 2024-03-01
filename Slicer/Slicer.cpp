@@ -1,7 +1,7 @@
 //-----------------------------------------------------------
 //  Discription: Cut out a 2D slice of a geometric entity in 3D (stl, obj, or top format)
-//        Usage: <path to the STL file (input)> <x0> <y0> <z0> (one point on the cut-plane)
-//               <n0> <n1> <n2> (normal direction) <path to the TOP file (output)>
+//        Usage: <input file> <x0> <y0> <z0> (origin on the cut-plane)
+//               <nx> <ny> <nz> (normal direction) <output file (top)>
 //       Author: Kevin Wang (created in Feb, 2024) 
 //-----------------------------------------------------------
 
@@ -36,8 +36,8 @@ int verbose = 1;
 int main(int argc, char* argv[]) {
 
   if (argc != 9) {
-    std::cerr << "Usage: " << argv[0] << " <input file (STL, OBJ, or TOP)> <x0> <y0> <z0> (original on "
-                << "the cut-plane) <n0> <n1> <n2> (normal direction) <output file (TOP)>" << endl;
+    std::cerr << "Usage: " << argv[0] << " <input file (STL, OBJ, or TOP)> <x0> <y0> <z0> (origin on "
+                << "the cut-plane) <nx> <ny> <nz> (normal direction) <output file (TOP)>" << endl;
     exit(-1); 
   }
 

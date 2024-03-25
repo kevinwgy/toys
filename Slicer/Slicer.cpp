@@ -15,6 +15,7 @@
 #include <cstring>
 #include <deque>
 #include <array>
+#include <list>
 #include <map>
 #include "GeoToolsLite.h"
 #include "Vector2D.h"
@@ -149,18 +150,45 @@ int main(int argc, char* argv[]) {
 
 
   // ------------------------------------------
-  // Step 4: Drop trivial elements (single-node)
+  // Step 4: Drop trivial elements (single-node and duplicates)
   // ------------------------------------------
-  vector<Int2> Ecut_cleaned;
+  list<Int2> Ecut_cleaned_list;
   set<int> hanging;
   for(auto&& elem : Ecut) {
     if(elem[0] != elem[1])
-      Ecut_cleaned.push_back(elem);
+      Ecut_cleaned_list.push_back(elem);
     else
       hanging.insert(elem[0]); //possibly hanging
   }
-  fprintf(stdout,"- Detected and removed %d degenerate elements (single node).\n", Ecut.size()-Ecut_cleaned.size());
+  fprintf(stdout,"- Detected and removed %d degenerate elements (single node).\n",
+                 Ecut.size()-Ecut_cleaned_list.size());
+  
 
+  Ecut_cleaned_list.sort([](Int2 a, Int2 b) {return a[0]+a[1] < b[0]+b[1];});
+  int nDupElem = 0;
+  { //put "it" inside a scope
+    auto it = Ecut_cleaned_list.begin();
+    while (it != Ecut_cleaned_list.end()) {
+      int sum = (*it)[0] + (*it)[1];
+      bool erased_elem = false;
+      for(auto it2 = std::next(it); it2 != Ecut_cleaned_list.end(); it2++) {
+        if ((*it2)[0] + (*it2)[1] != sum) //Ecut_cleaned_list is sorted by sum
+          break;
+        // sum is the same
+        if((*it)[0] == (*it2)[0] || (*it)[0] == (*it2)[1]) {
+          it = Ecut_cleaned_list.erase(it);
+          erased_elem = true;
+          nDupElem++;
+          break;
+        }
+      }
+      if(!erased_elem) //otherwise, "it" has already advanced.
+        it++;
+    }
+  }
+  fprintf(stdout,"- Detected and removed %d duplicated elements.\n", nDupElem);
+
+  vector<Int2> Ecut_cleaned(Ecut_cleaned_list.begin(), Ecut_cleaned_list.end());
 
   // ------------------------------------------
   // Step 5: Find and drop hanging nodes

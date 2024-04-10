@@ -1,0 +1,3 @@
+mpicxx solver1.cpp -o solver1 -O3
+mpicxx solver2.cpp -o solver2 -O3
+mpicxx solver3.cpp -o solver3 -O3

@@ -1,4 +1,5 @@
 mpicxx solver1.cpp -o Solver1 -O3
 mpicxx solver2.cpp -o Solver2 -O3
 mpicxx solver3.cpp -o Solver3 -O3
-##mpicxx solver4.cpp -o Solver4 -O3
+mpicxx solver4.cpp -o Solver4 -O3
+mpicxx solver5.cpp -o Solver5 -O3

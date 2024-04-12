@@ -126,8 +126,8 @@ int main(int argc, char *argv[])
 
     //-----------------------------
     // Pretend to be working :P
-    usleep(walldt*1e6);
-
+    double wait_time = walldt/size; //assuming perfect scalability
+    usleep(wait_time*1e6);
     //-----------------------------
 
     //-----------------------------
@@ -139,7 +139,27 @@ int main(int argc, char *argv[])
       chrono::duration<double> elapsed_seconds = current_time - start_time;
       fprintf(out, "Step %d: t = %e, computation time = %e s.\n", step, t, elapsed_seconds.count());
       fflush(out);
-      
+
+      for(int i=0; i<maxcolor; i++) {
+        if(color==i || newleaders[i]<0)
+          continue;
+
+        // should I talk to solver i now?
+        bool talk = false;
+        if(step==0)
+          talk = true; //first time-step
+        else if(dt_all[i]<=dt) //their dt is smaller or equal, always send
+          talk = true;
+        else if (floor((t+dt)/dt_all[i]) != floor(t/dt_all[i]))
+          talk = true;
+        //else
+        //  fprintf(out, "  o floor0 = %d, floor1 = %d, t = %e, dt = %e, dt_o = %e.\n",
+        //          (int)floor((t-dt)/dt_all[i]), (int)floor(t/dt_all[i]), t, dt, dt_all[i]);
+        //if(talk)
+        //  fprintf(out, "  o Want to exchange data with Solver %d.\n", i+1);
+      }
+      fflush(out);
+
       vector<MPI_Request> send_requests, recv_requests;
       for(int i=0; i<maxcolor; i++) {
         if(color==i || newleaders[i]<0)
@@ -147,10 +167,13 @@ int main(int argc, char *argv[])
 
         // should I talk to solver i now?
         bool talk = false;
-        if(dt_all[i]<=dt) //their dt is smaller or equal, always send
+        if(step==0)
+          talk = true; //first time-step
+        else if(dt_all[i]<=dt) //their dt is smaller or equal, always send
           talk = true;
-        else if (floor((t-dt)/dt_all[i]) != floor(t/dt_all[i]))
+        else if (floor((t+dt)/dt_all[i]) != floor(t/dt_all[i]))
           talk = true;
+          
  
         // exchange data
         if(talk) {
@@ -163,6 +186,7 @@ int main(int argc, char *argv[])
           MPI_Irecv(recvbuffer.data(), recvbuffer.size(), MPI_DOUBLE, MPI_ANY_SOURCE, i, c[i], &recv_requests.back());
 
           fprintf(out, "  o Exchanging data with Solver %d.\n", i+1);
+          fflush(out);
         }
       }
       
@@ -186,23 +210,12 @@ int main(int argc, char *argv[])
     auto current_time = chrono::system_clock::now();
     chrono::duration<double> elapsed_seconds = current_time - start_time;
     fprintf(out, "Computation time: %e.\n", elapsed_seconds.count());
-    fclose(out);
 
     fprintf(stdout,"[Proc %d]: Solver %d --> Normal Termination\n", global_rank, color+1);
     fflush(stdout);
   }
-
-
-/*
-  int joint_rank, joint_size;
-  MPI_Comm_rank(joint_comm, &joint_rank);
-  MPI_Comm_size(joint_comm, &joint_size);
-
-  fprintf(stderr,"Solver 1 (proc %d of %d) -- joint_comm: %d of %d.\n", rank, size, joint_rank, joint_size);
-
-  if(rank==0)
-    MPI_Send(&global_rank, 1, MPI_INT, 0, 999, joint_comm);
-*/
+  fclose(out);
+  
 
   MPI_Finalize();
   return 0;

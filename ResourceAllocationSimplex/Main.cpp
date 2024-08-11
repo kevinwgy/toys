@@ -5,9 +5,12 @@
 #include<algorithm>
 #include<list>
 #include<iomanip>
+#include<IoData.h>
 using namespace std;
 
 double epsilon = 1.0e-15;
+
+//-----------------------------------------------------------------------
 
 class Solver {
 
@@ -35,54 +38,49 @@ protected:
   }
 };
 
-
+//-----------------------------------------------------------------------
 double CostFunction(vector<Solver> &S, vector<int> &n, vector<int> &limiting_solver,
-                    vector<int> &non_limiting_solver) {
+                    vector<int> &non_limiting_solver);
 
-  assert(S.size() == n.size());
-  limiting_solver.clear();
-
-  double max_cost = -DBL_MAX; 
-  double my_cost;
-
-  for(int i=0; i<(int)S.size(); i++) {
-    my_cost = S[i].Cost(n[i]);
-    if(my_cost > max_cost+epsilon) {
-      max_cost = my_cost;
-      limiting_solver.clear();
-      limiting_solver.push_back(i);
-    } 
-    else if (my_cost >= max_cost-epsilon) {//essentially equal
-      limiting_solver.push_back(i);
-    }
-  }
-
-  vector<bool> tmp(n.size(), 0);
-  for(auto&& s : limiting_solver)
-    tmp[s] = 1;
-  non_limiting_solver.clear();
-  for(int i=0; i<(int)tmp.size(); i++)
-    if(!tmp[i])
-      non_limiting_solver.push_back(i);
-
-  return max_cost;
-}
-
+//-----------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
 
+  IoData iod(argc, argv);
+
   //---------------------------------------
   // User inputs
-  int N = 50000;
+  int N = iod.input.N;
   vector<Solver> solver;
-  solver.push_back(Solver(0.2/*dt*/, 0.2/*walltime per step*/, Solver::AMDAHL, 0.999));
-  solver.push_back(Solver(1.2/*dt*/, 0.5/*walltime per step*/, Solver::GUSTAFSON, 0.1));
-  solver.push_back(Solver(0.2/*dt*/, 1.0/*walltime per step*/, Solver::AMDAHL, 0.9995));
-  solver.push_back(Solver(0.1/*dt*/, 0.5/*walltime per step*/, Solver::AMDAHL, 1.0));
-  solver.push_back(Solver(0.3/*dt*/, 0.8/*walltime per step*/, Solver::GUSTAFSON, 0.2));
-  solver.push_back(Solver(0.4/*dt*/, 1.2/*walltime per step*/, Solver::GUSTAFSON, 0.1));
-  solver.push_back(Solver(0.06/*dt*/, 4.5/*walltime per step*/, Solver::GUSTAFSON, 0.05));
+  int Nc = iod.input.solverMap.dataMap.size(); //total number of solvers
+  assert(Nc<=N);
+  for(auto&& s : iod.input.solverMap.dataMap) {
+    int id = s.first;
+    if(id<0 || id>=Nc) {
+      fprintf(stdout, "*** Error: Solver id should be between 0 and %d. Found %d.\n", Nc-1, id);
+      exit(-1);
+    }
+
+    Solver::Law mylaw;
+    if(s.second->law == SolverData::PERFECT)        mylaw = Solver::PERFECT;
+    else if(s.second->law == SolverData::AMDAHL)    mylaw = Solver::AMDAHL;
+    else if(s.second->law == SolverData::GUSTAFSON) mylaw = Solver::GUSTAFSON;
+    else {
+      fprintf(stdout, "*** Error: Found unknown scaling law.\n");
+      exit(-1);
+    }
+    solver.push_back(Solver(s.second->dt, s.second->tprime, mylaw, s.second->law_coeff));
+  }
+
+
+  //solver.push_back(Solver(0.2/*dt*/, 0.2/*walltime per step*/, Solver::AMDAHL, 0.999));
+  //solver.push_back(Solver(1.2/*dt*/, 0.5/*walltime per step*/, Solver::GUSTAFSON, 0.1));
+  //solver.push_back(Solver(0.2/*dt*/, 1.0/*walltime per step*/, Solver::AMDAHL, 0.9995));
+  //solver.push_back(Solver(0.1/*dt*/, 0.5/*walltime per step*/, Solver::AMDAHL, 1.0));
+  //solver.push_back(Solver(0.3/*dt*/, 0.8/*walltime per step*/, Solver::GUSTAFSON, 0.2));
+  //solver.push_back(Solver(0.4/*dt*/, 1.2/*walltime per step*/, Solver::GUSTAFSON, 0.1));
+  //solver.push_back(Solver(0.06/*dt*/, 4.5/*walltime per step*/, Solver::GUSTAFSON, 0.05));
   
   //solver.push_back(Solver(0.01/*dt*/, 1.0/*walltime per step*/, Solver::AMDAHL, 1.0));
   //solver.push_back(Solver(0.1/*dt*/, 1.0/*walltime per step*/, Solver::AMDAHL, 1.0));
@@ -94,8 +92,6 @@ int main(int argc, char* argv[])
 
 
   //initialization
-  int Nc = solver.size();
-  assert(N>=Nc);
   vector<int> allocation(Nc,N/Nc); //solution
   vector<int> limiting_solver, non_limiting_solver;
   allocation[0] += N-(N/Nc)*Nc;
@@ -191,5 +187,39 @@ int main(int argc, char* argv[])
   return 0;
 }
 
+//-----------------------------------------------------------------------
 
+double CostFunction(vector<Solver> &S, vector<int> &n, vector<int> &limiting_solver,
+                    vector<int> &non_limiting_solver){
+
+  assert(S.size() == n.size());
+  limiting_solver.clear();
+
+  double max_cost = -DBL_MAX; 
+  double my_cost;
+
+  for(int i=0; i<(int)S.size(); i++) {
+    my_cost = S[i].Cost(n[i]);
+    if(my_cost > max_cost+epsilon) {
+      max_cost = my_cost;
+      limiting_solver.clear();
+      limiting_solver.push_back(i);
+    } 
+    else if (my_cost >= max_cost-epsilon) {//essentially equal
+      limiting_solver.push_back(i);
+    }
+  }
+
+  vector<bool> tmp(n.size(), 0);
+  for(auto&& s : limiting_solver)
+    tmp[s] = 1;
+  non_limiting_solver.clear();
+  for(int i=0; i<(int)tmp.size(); i++)
+    if(!tmp[i])
+      non_limiting_solver.push_back(i);
+
+  return max_cost;
+}
+
+//-----------------------------------------------------------------------
 

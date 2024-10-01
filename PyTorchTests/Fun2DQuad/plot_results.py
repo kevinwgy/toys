@@ -33,13 +33,13 @@ validation_data = MyDataset("validation_data.txt");
 # ---------------------------------------------
 # Plot
 # ---------------------------------------------
-x = np.linspace(0, 1.0, 200);
-y = np.linspace(0, 1.0, 200);
+x = np.linspace(-0.5, 1.5, 200);
+y = np.linspace(-0.5, 1.5, 200);
 z = np.array([(i-0.5)*(i-0.5)*(j-0.5)*(j-0.5) for j in y for i in x]);
 X, Y = np.meshgrid(x,y);
 Z = z.reshape(200,200);
 plt.figure(figsize=(12,10));
-plt.pcolor(X,Y,Z,vmin=0.0,vmax=0.0625,shading='auto');
+plt.pcolormesh(X,Y,Z,vmin=0.0,vmax=0.0625,shading='auto');
 plt.colorbar();
 tplot = training_data.plot();
 tplot.set_facecolor('none');
@@ -49,19 +49,19 @@ vplot = validation_data.plot();
 vplot.set_facecolor('none');
 vplot.set_edgecolor('b');
 vplot.set_linewidth(2);
+plt.savefig('ref2.png')
 plt.draw();
 
 # Uncomment the next two lines to check extrapolation results
-x = np.linspace(-0.5, 1.5, 200);
-y = np.linspace(-0.5, 1.5, 200);
 xy = torch.from_numpy(np.array([[i,j] for j in y for i in x]));
 xy = xy.float();
 z = model(xy).detach().numpy();
 X, Y = np.meshgrid(x,y);
 Z = z.reshape(200,200);
 plt.figure(figsize=(12,10));
-plt.pcolor(X,Y,Z,vmin=0.0,vmax=0.0625,shading='auto');
+plt.pcolormesh(X,Y,Z,vmin=0.0,vmax=0.0625,shading='auto');
 plt.colorbar();
+plt.savefig('extrap.png')
 plt.draw();
 
 plt.show();

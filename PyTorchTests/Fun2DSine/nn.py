@@ -161,6 +161,7 @@ best_params = None;
 history = [];
 
 for it in range(Niter):
+  print(f"Iteration {it}:\n");
   training(training_dataloader, model, objective_fun, optimizer);
   test_obj = validation(validation_dataloader, model, objective_fun);
   history.append(test_obj);
@@ -178,6 +179,7 @@ model_scripted.save('model_scripted.pt') # Save
 print("Done!");
 print(f"Best average error: {best_obj:>8f} \n");
 plt.plot(history);
+plt.savefig('hist.png');
 plt.draw();
 
 
@@ -191,7 +193,7 @@ if True:
   X, Y = np.meshgrid(x,y);
   Z = z.reshape(200,200);
   plt.figure(figsize=(12,10));
-  plt.pcolor(X,Y,Z,vmin=-1,vmax=1,shading='auto');
+  plt.pcolormesh(X,Y,Z,vmin=-1,vmax=1,shading='auto');
   plt.colorbar();
   tplot = training_data.plot();
   tplot.set_facecolor('none');
@@ -201,24 +203,23 @@ if True:
   vplot.set_facecolor('none');
   vplot.set_edgecolor('b');
   vplot.set_linewidth(2);
+  plt.savefig('ref1.png');
   plt.draw()
 
 
 if True:
   x = np.linspace(0, 1, 200);
   y = np.linspace(0, 1, 200);
-  #x = np.linspace(-0.5, 1.5, 200);
-  #y = np.linspace(-0.5, 1.5, 200);
   xy = torch.from_numpy(np.array([[i,j] for j in y for i in x]));
   xy = xy.float();
   z = model(xy).detach().numpy();
   X, Y = np.meshgrid(x,y);
   Z = z.reshape(200,200);
   plt.figure(figsize=(12,10));
-  plt.pcolor(X,Y,Z,vmin=-1,vmax=1,shading='auto');
+  plt.pcolormesh(X,Y,Z,vmin=-1,vmax=1,shading='auto');
   plt.colorbar();
+  plt.savefig('interp.png');
   plt.draw()
- 
 
 plt.show();
 

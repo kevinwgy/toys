@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 
   auto fun = [pi](double x, double y) {return cos(2*pi*x)*sin(2*pi*y);};
 //  auto fun = [](double x, double y) {return (x-0.5)*(x-0.5)*(y-0.5)*(y-0.5);};
-//  auto fun = [](double x, double y) {return x*y;}
+//  auto fun = [](double x, double y) {return x*y;};
 
   //random number generators
   double xmax = 1.0, ymax = 1.0;

@@ -18,14 +18,15 @@ int main(int argc, char* argv[])
     assert(Ntrain>0 && Nvalid>0);
   }
 
-//  auto fun = [pi](double x, double y) {return cos(2*pi*x)*sin(2*pi*y);};
-  auto fun = [](double x, double y) {return (x-0.5)*(x-0.5)*(y-0.5)*(y-0.5);};
+  auto fun = [pi](double x, double y) {return cos(2*pi*x)*sin(2*pi*y);};
+//  auto fun = [](double x, double y) {return (x-0.5)*(x-0.5)*(y-0.5)*(y-0.5);};
 //  auto fun = [](double x, double y) {return x*y;}
 
   //random number generators
   double xmax = 1.0, ymax = 1.0;
   random_device dev;
-  mt19937 rng(dev()); //standard generator (engine) seeded with dev()
+  mt19937 rng(1); //standard generator (engine) seeded with a fixed number (1)
+  //mt19937 rng(dev()); //standard generator (engine) seeded with dev()
   uniform_real_distribution<> xgen(0.0, xmax);
   uniform_real_distribution<> ygen(0.0, ymax);
 

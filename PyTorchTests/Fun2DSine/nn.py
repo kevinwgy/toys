@@ -139,7 +139,6 @@ def training(dataloader, model, obj_fn, optimizer):
       print(f"loss: {obj:>7f}  [{current:>5d}/{size:>5d}]");
 
 def validation(dataloader, model, obj_fn):
-  size = len(dataloader.dataset);
   model.eval(); #turn on evaluation mode 
   num_batches = len(dataloader);
   test_obj = 0.0;

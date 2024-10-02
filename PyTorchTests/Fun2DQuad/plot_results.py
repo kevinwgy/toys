@@ -52,7 +52,6 @@ vplot.set_linewidth(2);
 plt.savefig('ref2.png')
 plt.draw();
 
-# Uncomment the next two lines to check extrapolation results
 xy = torch.from_numpy(np.array([[i,j] for j in y for i in x]));
 xy = xy.float();
 z = model(xy).detach().numpy();

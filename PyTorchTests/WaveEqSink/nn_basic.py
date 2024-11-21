@@ -14,7 +14,7 @@ step_size = 0.001;
 objective_fun = nn.MSELoss(); #least squares
 optimizer_type = "Adam";
 data_batch_size = 25;
-Niter = 1000;
+Niter = 500; #can be increased to 1000 for slightly better prediction
 ###########################################
 
 
@@ -57,10 +57,8 @@ class MyDataset(torch.utils.data.Dataset):
     self.filename = filename;
     rawdata = np.genfromtxt(self.filename);
     ncol = rawdata.shape[1];
-    self.X = rawdata[:, 2:5];  #rows 2, 3, 4 are inputs
-    self.F = rawdata[:,ncol-7:ncol-1]; #six outputs
-# Currently the 'label' is not being used 
-    self.Label = rawdata[:,ncol-1:ncol];  
+    self.X = rawdata[:, 0:3];  #rows 0, 1, 2 are inputs
+    self.F = rawdata[:,ncol-6:ncol]; #six outputs
   def __len__(self):
     return len(self.F);
   def __getitem__(self, idx):
@@ -69,8 +67,8 @@ class MyDataset(torch.utils.data.Dataset):
   #  return plt.scatter(self.X[:,0], self.X[:,1]);
     
 
-training_data   = MyDataset("training_data.txt");
-validation_data = MyDataset("validation_data.txt");
+training_data   = MyDataset("DataPrep/training_data.txt");
+validation_data = MyDataset("DataPrep/validation_data.txt");
 
 
 # ----------------------------------------------------------------------------------

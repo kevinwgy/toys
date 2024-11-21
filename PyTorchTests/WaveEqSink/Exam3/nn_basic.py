@@ -22,67 +22,25 @@ Niter = 500; #can be increased to 1000 for slightly better prediction
 # A neural network based on linear operators & common activation fuctions
 # ----------------------------------------------------------------------------------
 class NeuralNetwork(nn.Module):
-  def __init__(self, size_in : int, size_out : int):
+  def __init__(self):
     super().__init__()
-    self.size_in = size_in
-    self.size_out = size_out
     self.layers = nn.Sequential(
-      nn.Linear(size_in, 20),  
+      nn.Linear(3, 20),  # 3 inputs
       nn.ReLU(),
       nn.Linear(20, 20),
       nn.ReLU(),
       nn.Linear(20, 20),
       nn.ReLU(),
-      nn.Linear(20, size_out),
+      nn.Linear(20, 6), # 2n=6 outputs
     )
-
-
-  def forward(self, X):
-
-    num_items = self.size_out // 2; # divide by 2 and drop the remainder
-    x = X[0:self.size_in] if X.ndim==1 else X[:,0:self.size_in]; #get col vector
-
-
-    # ----------------------------
-    # non-dimensionalization
-    uc = X[0].clone().detach() if X.ndim==1 else X[:,0].clone().detach();  # uc = a (create a new variable)
-    tc = 1.0;
-    xc = 1.0; # must set tc and xc to 1 --- otherwise some "constant" inputs are not constant anymore
-    if X.ndim==1:
-      x[0] /= uc;
-      x[2] /= uc;
-    else:
-      x[:,0] /= uc;
-      x[:,2] /= uc;
-    # ----------------------------
-
-    out = self.layers(x)
-
-    # ----------------------------
-    # recover dimensional quantities
-    if X.ndim==1:
-      out *= uc;
-    else:
-      for i in range(self.size_out):
-        out[:,i] *= uc;
-    # ----------------------------
-
-    e0 = uc; #true conserved quantity
-    
-    if X.ndim==1:
-      e   = torch.sum(out[:num_items]) - torch.sum(out[num_items:])
-    else:
-      e   = torch.sum(out[:, :num_items], dim=1) - torch.sum(out[:, num_items:], dim=1)
-      e   = e.unsqueeze(1)
-      e0  = e0.unsqueeze(1)
-    
-    return torch.div(torch.mul(out, e0), e)
+  def forward(self, x):
+    return self.layers(x)
 
 
 # ----------------------------------------------------------------------------------
 # 1. Choose model
 # ----------------------------------------------------------------------------------
-model = NeuralNetwork(3,6) if model_type=="neural_network" else NeuralNetwork(3,6); #add choices later
+model = NeuralNetwork() if model_type=="neural_network" else NeuralNetwork(); #add choices later
 
 device = "cpu"; #("cuda" if torch.cuda.is_available() else "cpu");
 print(f"Using {device} device");
@@ -109,8 +67,8 @@ class MyDataset(torch.utils.data.Dataset):
   #  return plt.scatter(self.X[:,0], self.X[:,1]);
     
 
-training_data   = MyDataset("DataPrep/training_data.txt");
-validation_data = MyDataset("DataPrep/validation_data.txt");
+training_data   = MyDataset("../DataPrep/training_data.txt");
+validation_data = MyDataset("../DataPrep/validation_data.txt");
 
 
 # ----------------------------------------------------------------------------------

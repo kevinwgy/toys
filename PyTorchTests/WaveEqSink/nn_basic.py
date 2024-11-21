@@ -62,7 +62,7 @@ class MyDataset(torch.utils.data.Dataset):
   def __len__(self):
     return len(self.F);
   def __getitem__(self, idx):
-    return self.X[idx,:], self.F[idx];
+    return self.X[idx,:], self.F[idx,:];
   #def plot(self):
   #  return plt.scatter(self.X[:,0], self.X[:,1]);
     

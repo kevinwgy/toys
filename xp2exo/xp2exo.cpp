@@ -60,17 +60,15 @@ static void usage() {
 
 int main(int argc, char** argv)
 {
-  char word1[20],word2[20],word3[20];
-  int int1,ncomponent,frame;
+  char word1[20],word2[20];
+  int int1,ncomponent;
 
   vector< top_block* > myElements;
   set<int> deletedElements;
 
   double x,y,z;
-  double garbage;
   char line[512];
   int CPU_word_size=8,IO_word_size=8;
-  int bFictiousTime = 0;
 
   std::map<int,int> exodusRemap;
 
@@ -100,7 +98,6 @@ int main(int argc, char** argv)
 			 &CPU_word_size,/* CPU float word size in bytes */
 			 &IO_word_size);/* I/O float word size in bytes */
 
-  int num_dim = 3;
   vector<double> X,Y,Z;
 
   //load node coordinates
@@ -122,7 +119,7 @@ int main(int argc, char** argv)
   cout<<"Loaded "<< nNodes <<" nodes."<<endl;
   
   std::string name,tmp,tmp1;
-  int id,elid,i,en;
+  int id,i,en;
 
   int num_elem_block = 0;
   int num_elem = 0;
@@ -261,7 +258,6 @@ int main(int argc, char** argv)
         exit(-1);
       }
       string cmd = "rm -f "; cmd += argv[2]; cmd += "-s.*";
-      int x = system(cmd.c_str());
       isNodal[m] = false;
       deletedElementsFile = m;
       sols[m] >> deletedElementTime >> deletedElementNo >> cause;
@@ -361,6 +357,10 @@ int main(int argc, char** argv)
 
             char *filename = new char[strlen(argv[2])+10];
             char extension[8];
+            if(s>=9998) {
+              fprintf(stdout,"***Error: Cannot handle more than 9999 frames due to file formating.\n");
+              exit(-1);
+            }
             sprintf(extension,"-s.%04d",s+1);
             strcpy(filename,argv[2]);
             strcat(filename,extension);
@@ -488,7 +488,7 @@ void writeMesh(int exoid, int nNodes, int num_elem, int num_elem_block, std::map
   elem_types[2120] = "QUAD";
   int i = 0;
   int bc = 0;
-  for (i = 0; i < myElements.size(); ++i) {
+  for (i = 0; i < (int)myElements.size(); ++i) {
 
     top_block& tb = *myElements[i];
     for (top_block::iterator itr = tb.begin(); itr != tb.end(); ++itr) {
@@ -529,7 +529,7 @@ void deleteElements(int &num_elem, vector< top_block* > &myElements, set<int> &d
         if(deletedElements.find(*itr2) != deletedElements.end()) {
           std::cerr << "deleting element " << *itr2 << " from " << itr->second.name << std::endl;
 #if (__cplusplus >= 201103L) || defined(HACK_INTEL_COMPILER_ITS_CPP11)
-          for(int j=1; j<myElements.size(); ++j) {
+          for(unsigned j=1; j<myElements.size(); ++j) {
             top_block& fb = *myElements[j];
             for (top_block::iterator itr4 = fb.begin(); itr4 != fb.end(); ++itr4) {
               if(itr4->second.name.compare(0,8,"surface_") != 0) continue;

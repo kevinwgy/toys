@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
   string text;
 
   // Read the header
-  getline(input,text);
+  input >> text; //first word of file
   double msh_version = 0;
   input >> msh_version;
   if (msh_version > 2.0 - 1.0e-8 && msh_version < 3.0 - 1.0e-8) {// MSH version 2

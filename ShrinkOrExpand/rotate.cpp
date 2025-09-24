@@ -65,8 +65,8 @@ int main (int argc, char* argv[])
       xi1 = y;
       xi2 = z;
     } else if (axis == Y) {
-      xi1 = x;
-      xi2 = z;
+      xi1 = z;
+      xi2 = x;
     } else if (axis == Z) {
       xi1 = x;
       xi2 = y;
@@ -95,8 +95,8 @@ int main (int argc, char* argv[])
       y = xi1;
       z = xi2;
     } else if (axis == Y) {
-      x = xi1;
-      z = xi2;
+      z = xi1;
+      x = xi2;
     } else if (axis == Z) {
       x = xi1;
       y = xi2;

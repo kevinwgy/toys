@@ -72,9 +72,24 @@ void ProcessMSH4(ifstream &input, ofstream &output, string outputfilename)
   multimap<int,int> entity2volume; //this is a multimap because one entity can belong to multiple volumes
   map<int,ofstream*> surfaceTopo;
   map<int,int> surfaceTopoCounter;
-  getline(input,text);
-  if(text.compare("$Entities")) {
-    cerr << "ERROR: Expecting '$Entities', but got " << text << " instead. Aborting." << endl;
+
+
+  // ------------------------------------------------------------
+  // Scan forward until $Entities is found.
+  // If any keyword line beginning with '$' is encountered first,
+  // print a message and ignore that section/header.
+  // ------------------------------------------------------------
+  while (getline(input, text)) {
+    if (text == "$Entities")
+      break;
+
+    if (!text.empty() && text[0] == '$')
+      cout << "Notice: encountered keyword '" << text
+           << "' before $Entities. Ignoring it." << endl;
+  }
+
+  if (!input || text != "$Entities") {
+    cerr << "ERROR: Could not find '$Entities'. Aborting." << endl;
     exit(-1);
   }
 

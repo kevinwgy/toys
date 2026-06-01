@@ -137,6 +137,7 @@ int main(int argc, char** argv)
   elem_nodes[117] = 8;
   elem_nodes[121] = 2;
   elem_nodes[122] = 2;
+  elem_nodes[102] = 4;
   elem_nodes[104] = 3;
   elem_nodes[108] = 3;
   elem_nodes[123] = 4;
